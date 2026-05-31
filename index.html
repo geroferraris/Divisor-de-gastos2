@@ -135,6 +135,19 @@ function addPerson(){
     render();
 }
 
+function hasDebts(name){
+
+    for(let m of moves){
+        for(let d of m.debts){
+            if(d.from === name || d.to === name){
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+    
 function addMove(){
 
     let desc = document.getElementById("desc").value.trim();
@@ -212,16 +225,20 @@ function calcFinal(){
 
 function deletePerson(name){
 
-    people = people.filter(p => p !== name);
+    if(hasDebts(name)){
+        alert("No se puede eliminar: tiene deudas activas");
+        return;
+    }
 
-    moves.forEach(m=>{
-        m.debts = m.debts.filter(d =>
-            d.from !== name && d.to !== name
-        );
-    });
+    let ok = confirm(`¿Eliminar a ${name}?`);
+
+    if(!ok) return;
+
+    people = people.filter(p => p !== name);
 
     render();
 }
+
 
 function render(){
 

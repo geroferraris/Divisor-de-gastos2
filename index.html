@@ -195,7 +195,7 @@ function calcFinal(){
 
     let map = {};
 
-    for(let m of moves){
+    for(let m of getVisibleMoves()){
         for(let d of m.debts){
 
             let k = d.from + "->" + d.to;
@@ -238,10 +238,8 @@ function deletePerson(name){
 
     if(!confirm("¿Eliminar persona y todo su historial?")) return;
 
-    // ❌ eliminar persona
     people = people.filter(p => p !== name);
 
-    // ❌ eliminar TODA referencia en movimientos
     moves = moves
         .map(m => {
 
@@ -256,20 +254,15 @@ function deletePerson(name){
     render();
 }
 
-function cleanMoves(){
-
-    moves = moves.map(m => {
-
-        m.debts = m.debts.filter(d =>
-            people.includes(d.from) && people.includes(d.to)
-        );
-
-        return m;
-    }).filter(m => m.debts.length > 0);
+function getVisibleMoves(){
+    return moves.filter(m =>
+        m.debts.some(d =>
+            people.includes(d.from) || people.includes(d.to)
+        )
+    );
 }
     
 function render(){
-    cleanMoves();
     
     let payer = document.getElementById("payer");
     let checks = document.getElementById("checks");
@@ -296,8 +289,8 @@ function render(){
     let h = document.getElementById("history");
     h.innerHTML = "";
 
-    moves.forEach(m => {
-
+    getVisibleMoves().forEach(m => {
+        
         if(!m.debts || m.debts.length === 0) return;
 
         // si ya no existe ningún participante real, no mostrar

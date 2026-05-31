@@ -243,8 +243,21 @@ function deletePerson(name){
     render();
 }
 
-function render(){
+function cleanMoves(){
 
+    moves = moves.map(m => {
+
+        m.debts = m.debts.filter(d =>
+            people.includes(d.from) && people.includes(d.to)
+        );
+
+        return m;
+    }).filter(m => m.debts.length > 0);
+}
+    
+function render(){
+    cleanMoves();
+    
     let payer = document.getElementById("payer");
     let checks = document.getElementById("checks");
 

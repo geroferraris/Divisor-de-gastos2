@@ -236,9 +236,22 @@ function deletePerson(name){
         return;
     }
 
-    if(!confirm("¿Eliminar persona?")) return;
+    if(!confirm("¿Eliminar persona y todo su historial?")) return;
 
+    // ❌ eliminar persona
     people = people.filter(p => p !== name);
+
+    // ❌ eliminar TODA referencia en movimientos
+    moves = moves
+        .map(m => {
+
+            m.debts = m.debts.filter(d =>
+                d.from !== name && d.to !== name
+            );
+
+            return m;
+        })
+        .filter(m => m.debts.length > 0);
 
     render();
 }

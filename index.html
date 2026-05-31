@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>Divisor de gastos</title>
+
+<style>
+body{
+    margin:0;
+    padding:20px;
+    background:#1e1e1e;
+    color:white;
+    font-family:Arial;
+}
+
+.card{
+    background:#2b2b2b;
+    padding:15px;
+    border-radius:15px;
+    margin-bottom:20px;
+}
+
+input, select, button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:10px;
+    background:#3a3a3a;
+    color:white;
+    font-size:16px;
+}
+
+button{background:#4caf50;}
+button:hover{opacity:0.9}
+
+.person{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px;
+    border-bottom:1px solid #444;
+}
+
+.xbtn{
+    background:#ff5555;
+    width:auto;
+    padding:6px 10px;
+    font-size:12px;
+    border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>💸 Deudas</h1>
+
+<div class="card">
+<h2>Personas</h2>
+
+<input id="nombre">
+<button onclick="addPerson()">Agregar</button>
+
+<div id="people"></div>
+</div>
+
+<div class="card">
+<h2>Movimiento</h2>
+
+<input id="desc" placeholder="Descripción">
+<input id="amount" placeholder="Monto" inputmode="decimal">
+
+<select id="payer"></select>
+
+<div id="checks"></div>
+
+<button onclick="addMove()">Agregar</button>
+</div>
+
+<div class="card">
+<h2>Historial (solo activo)</h2>
+<div id="history"></div>
+</div>
+
+<div class="card">
+<h2>Resultado final</h2>
+<div id="final"></div>
+</div>
+
+<div class="card">
+<button class="xbtn" onclick="resetAll()">
+    RESET
+</button>
+</div>
+
+<script>
+
+let people = [];
+let moves = [];
+
+function addPerson(){
+    let n = document.getElementById("nombre").value.trim();
+    if(!n) return;
+
+    people.push(n);
+    document.getElementById("nombre").value = "";
+    render();
+}
+
+function addMove(){
+
+    let desc = document.getElementById("desc").value.trim();
+    let amount = parseFloat(document.getElementById("amount").value.replace(",", "."));
+    let payer = document.getElementById("payer").value;
+
+    let selected = [...document.querySelectorAll("input[type=checkbox]:checked")]
+        .map(x => x.value);
+
+    if(!desc || isNaN(amount) || selected.length === 0) return;
+
+    let share = amount / selected.length;
+
+    let debts = [];
+
+    for(let p of selected){
+        if(p !== payer){
+            debts.push({
+                from: p,
+                to: payer,
+                amount: share
+            });
+        }
+    }
+
+    moves.push({
+        desc,
+        debts
+    });
+
+    render();
+}
+
+function calcFinal(){
+
+    let map = {};
+
+    for(let m of moves){
+        for(let d of m.debts){
+
+            let k = d.from + "->" + d.to;
+            map[k] = (map[k] || 0) + d.amount;
+        }
+    }
+
+    let keys = Object.keys(map);
+
+    for(let i=0;i<keys.length;i++){
+        for(let j=i+1;j<keys.length;j++){
+
+            let [a,b] = keys[i].split("->");
+            let [c,d] = keys[j].split("->");
+
+            if(a===d && b===c){
+
+                let diff = map[keys[i]] - map[keys[j]];
+
+                if(diff > 0){
+                    map[keys[i]] = diff;
+                    delete map[keys[j]];
+                } else {
+                    map[keys[j]] = -diff;
+                    delete map[keys[i]];
+                }
+            }
+        }
+    }
+
+    return map;
+}
+
+function deletePerson(name){
+
+    people = people.filter(p => p !== name);
+
+    moves.forEach(m=>{
+        m.debts = m.debts.filter(d =>
+            d.from !== name && d.to !== name
+        );
+    });
+
+    render();
+}
+
+function render(){
+
+    // selects
+    let payer = document.getElementById("payer");
+    let checks = document.getElementById("checks");
+
+    payer.innerHTML = "";
+    checks.innerHTML = "";
+
+    people.forEach(p=>{
+        payer.innerHTML += `<option value="${p}">${p}</option>`;
+        checks.innerHTML += `<label><input type="checkbox" value="${p}">${p}</label>`;
+    });
+
+    // people list
+    let pdiv = document.getElementById("people");
+    pdiv.innerHTML = "";
+
+    people.forEach(p=>{
+        pdiv.innerHTML += `
+        <div class="person">
+            <div>${p}</div>
+            <button class="xbtn" onclick="deletePerson('${p}')">X</button>
+        </div>`;
+    });
+
+    // history SOLO ACTIVO
+    let h = document.getElementById("history");
+    h.innerHTML = "";
+
+    moves.forEach(m=>{
+        if(!m.debts || m.debts.length === 0) return;
+
+        h.innerHTML += `<div><b>${m.desc}</b></div>`;
+
+        m.debts.forEach(d=>{
+            h.innerHTML += `<div style="margin-left:10px;opacity:0.8">
+                ${d.from} → ${d.to} : $${d.amount.toFixed(2)}
+            </div>`;
+        });
+
+        h.innerHTML += "<br>";
+    });
+
+    // final
+    let f = calcFinal();
+    let out = document.getElementById("final");
+    out.innerHTML = "";
+
+    for(let k in f){
+        out.innerHTML += `<div>${k} = $${f[k].toFixed(2)}</div>`;
+    }
+}
+
+function resetAll(){
+    if(confirm("¿Seguro que querés borrar todo?")){
+        people = [];
+        moves = [];
+        render();
+    }
+}
+
+render();
+
+</script>
+
+</body>
+</html>

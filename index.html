@@ -110,8 +110,8 @@ button:hover{opacity:0.9}
 
 <script>
 
-let people = [];
-let moves = [];
+let people = JSON.parse(localStorage.getItem("people")) || [];
+let moves = JSON.parse(localStorage.getItem("moves")) || [];
 
 
 // 🔥 ENTER PARA AGREGAR PERSONA (CORRECTO)
@@ -121,6 +121,11 @@ document.getElementById("nombre").addEventListener("keydown", e=>{
     }
 });
 
+function save(){
+    localStorage.setItem("people", JSON.stringify(people));
+    localStorage.setItem("moves", JSON.stringify(moves));
+}
+    
 function addPerson(){
 
     let input = document.getElementById("nombre");
@@ -131,7 +136,7 @@ function addPerson(){
     people.push(n);
 
     input.value = "";
-
+    save();
     render();
 }
 
@@ -187,7 +192,7 @@ function addMove(){
         desc,
         debts
     });
-
+    save();
     render();
 }
 
@@ -250,7 +255,7 @@ function deletePerson(name){
             return m;
         })
         .filter(m => m.debts.length > 0);
-
+    save();
     render();
 }
 

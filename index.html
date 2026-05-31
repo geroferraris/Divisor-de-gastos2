@@ -137,9 +137,14 @@ function addPerson(){
 
 function hasDebts(name){
 
-    for(let m of moves){
-        for(let d of m.debts){
-            if(d.from === name || d.to === name){
+    let f = calcFinal();
+
+    for(let k in f){
+
+        let [from,to] = k.split("->");
+
+        if(from === name || to === name){
+            if(Math.abs(f[k]) > 0.001){
                 return true;
             }
         }

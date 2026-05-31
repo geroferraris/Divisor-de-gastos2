@@ -135,7 +135,7 @@ function addPerson(){
     render();
 }
 
-function hasDebtState(name){
+function canDelete(name){
 
     let f = calcFinal();
 
@@ -143,17 +143,15 @@ function hasDebtState(name){
 
         let [from,to] = k.split("->");
 
-        let amount = f[k];
-
         if(from === name || to === name){
 
-            if(Math.abs(amount) > 0.005){
-                return true;
+            if(Math.round(f[k] * 100) !== 0){
+                return false;
             }
         }
     }
 
-    return false;
+    return true;
 }
     
 function addMove(){
@@ -233,8 +231,8 @@ function calcFinal(){
 
 function deletePerson(name){
 
-    if(hasDebtState(name)){
-        alert("No se puede eliminar: tiene saldo pendiente");
+    if(!canDelete(name)){
+        alert("No se puede eliminar: saldo distinto de cero");
         return;
     }
 
@@ -244,7 +242,6 @@ function deletePerson(name){
 
     render();
 }
-
 
 function render(){
 

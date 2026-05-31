@@ -270,12 +270,22 @@ function render(){
     let h = document.getElementById("history");
     h.innerHTML = "";
 
-    moves.forEach(m=>{
-        if(!m.debts.length) return;
+    moves.forEach(m => {
+
+        if(!m.debts || m.debts.length === 0) return;
+
+        // si ya no existe ningún participante real, no mostrar
+        let stillValid = m.debts.some(d =>
+        people.includes(d.from) || people.includes(d.to)
+        );
+
+        if(!stillValid) return;
 
         h.innerHTML += `<div><b>${m.desc}</b></div>`;
 
-        m.debts.forEach(d=>{
+        m.debts.forEach(d => {
+            if(!people.includes(d.from) && !people.includes(d.to)) return;
+
             h.innerHTML += `
             <div style="margin-left:10px;opacity:0.8">
                 ${d.from} → ${d.to} : $${d.amount.toFixed(2)}
@@ -290,6 +300,11 @@ function render(){
     out.innerHTML = "";
 
     for(let k in f){
+
+        let [from,to] = k.split("->");
+
+        if(!people.includes(from) || !people.includes(to)) continue;
+
         out.innerHTML += `<div>${k} = $${f[k].toFixed(2)}</div>`;
     }
 }

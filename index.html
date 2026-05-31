@@ -102,7 +102,11 @@ let people = [];
 let moves = [];
 
 function addPerson(){
-    let n = document.getElementById("nombre").value.trim();
+    let n = document.getElementById("nombre").addEventListener("keydown", e=>{
+        if(e.key === "Enter"){
+            addPerson();
+        }
+    });
     if(!n) return;
 
     people.push(n);

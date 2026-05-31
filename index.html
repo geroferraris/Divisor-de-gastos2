@@ -71,6 +71,7 @@ button:hover{opacity:0.9}
 <h2>Movimiento</h2>
 
 <input id="desc" placeholder="Descripción">
+
 <input id="amount" placeholder="Monto" inputmode="decimal">
 
 <select id="payer"></select>
@@ -101,23 +102,36 @@ button:hover{opacity:0.9}
 let people = [];
 let moves = [];
 
+
+// 🔥 ENTER PARA AGREGAR PERSONA (CORRECTO)
+document.getElementById("nombre").addEventListener("keydown", e=>{
+    if(e.key === "Enter"){
+        addPerson();
+    }
+});
+
 function addPerson(){
-    let n = document.getElementById("nombre").addEventListener("keydown", e=>{
-        if(e.key === "Enter"){
-            addPerson();
-        }
-    });
+
+    let input = document.getElementById("nombre");
+    let n = input.value.trim();
+
     if(!n) return;
 
     people.push(n);
-    document.getElementById("nombre").value = "";
+
+    input.value = "";
+
     render();
 }
 
 function addMove(){
 
     let desc = document.getElementById("desc").value.trim();
-    let amount = parseFloat(document.getElementById("amount").value.replace(",", "."));
+
+    let amount = parseFloat(
+        document.getElementById("amount").value.replace(",", ".")
+    );
+
     let payer = document.getElementById("payer").value;
 
     let selected = [...document.querySelectorAll("input[type=checkbox]:checked")]
@@ -200,7 +214,6 @@ function deletePerson(name){
 
 function render(){
 
-    // selects
     let payer = document.getElementById("payer");
     let checks = document.getElementById("checks");
 
@@ -212,7 +225,6 @@ function render(){
         checks.innerHTML += `<label><input type="checkbox" value="${p}">${p}</label>`;
     });
 
-    // people list
     let pdiv = document.getElementById("people");
     pdiv.innerHTML = "";
 
@@ -224,17 +236,17 @@ function render(){
         </div>`;
     });
 
-    // history SOLO ACTIVO
     let h = document.getElementById("history");
     h.innerHTML = "";
 
     moves.forEach(m=>{
-        if(!m.debts || m.debts.length === 0) return;
+        if(!m.debts.length) return;
 
         h.innerHTML += `<div><b>${m.desc}</b></div>`;
 
         m.debts.forEach(d=>{
-            h.innerHTML += `<div style="margin-left:10px;opacity:0.8">
+            h.innerHTML += `
+            <div style="margin-left:10px;opacity:0.8">
                 ${d.from} → ${d.to} : $${d.amount.toFixed(2)}
             </div>`;
         });
@@ -242,7 +254,6 @@ function render(){
         h.innerHTML += "<br>";
     });
 
-    // final
     let f = calcFinal();
     let out = document.getElementById("final");
     out.innerHTML = "";

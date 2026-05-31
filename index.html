@@ -135,7 +135,7 @@ function addPerson(){
     render();
 }
 
-function hasDebts(name){
+function hasDebtState(name){
 
     let f = calcFinal();
 
@@ -143,8 +143,11 @@ function hasDebts(name){
 
         let [from,to] = k.split("->");
 
+        let amount = f[k];
+
         if(from === name || to === name){
-            if(Math.abs(f[k]) > 0.001){
+
+            if(Math.abs(amount) > 0.005){
                 return true;
             }
         }
@@ -230,14 +233,12 @@ function calcFinal(){
 
 function deletePerson(name){
 
-    if(hasDebts(name)){
-        alert("No se puede eliminar: tiene deudas activas");
+    if(hasDebtState(name)){
+        alert("No se puede eliminar: tiene saldo pendiente");
         return;
     }
 
-    let ok = confirm(`¿Eliminar a ${name}?`);
-
-    if(!ok) return;
+    if(!confirm("¿Eliminar persona?")) return;
 
     people = people.filter(p => p !== name);
 
